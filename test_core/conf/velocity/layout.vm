@@ -1,0 +1,434 @@
+<html>
+<head>
+
+#parse("head.vm")
+
+
+<!-- Import D3 -->
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<link href="#{url_for_solr}/admin/file?file=/velocity/d3.css" rel="stylesheet">
+<script src="#{url_for_solr}/admin/file?file=/velocity/cvdi.js"></script>
+<link href="#{url_for_solr}/admin/file?file=/velocity/cvdi.css" rel="stylesheet">
+
+<!-- Import Twitter Bootstrap -->
+<!-- Le styles -->
+<link href="#{url_for_solr}/admin/file?file=/velocity/bootstrap/css/bootstrap.css" rel="stylesheet">
+<style type="text/css">
+  body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+  }
+  .sidebar-nav {
+    padding: 9px 0;
+  }
+
+  @media (max-width: 980px) {
+    /* Enable use of floated navbar text */
+    .navbar-text.pull-right {
+      float: none;
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+  }
+</style>
+<!-- Fav and touch icons -->
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="#{url_for_solr}/admin/file?file=/velocity/bootstrap/ico/apple-touch-icon-144-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="#{url_for_solr}/admin/file?file=/velocity/bootstrap/ico/apple-touch-icon-114-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="#{url_for_solr}/admin/file?file=/velocity/bootstrap/ico/apple-touch-icon-72-precomposed.png">
+<link rel="apple-touch-icon-precomposed" href="#{url_for_solr}/admin/file?file=/velocity/bootstrap/ico/apple-touch-icon-57-precomposed.png">
+<link rel="shortcut icon" href="#{url_for_solr}/admin/file?file=/velocity/bootstrap/ico/favicon.png"> 
+
+<link href="http://mcd.ischool.drexel.edu/ahn/conceptmapping2/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="#{url_for_solr}/admin/file?file=/velocity/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+<script src="#{url_for_solr}/admin/file?file=/velocity/bootstrap/js/bootstrap.js"></script>
+
+<!-- Import jQuery -->
+<!-- this should go after twitter bootstrap to enable tooltips -->
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+
+
+<!-- Sigma.js -->
+<script type="text/javascript" src="http://mcd.ischool.drexel.edu/ahn/digging-graph/sigma.min.js"></script>
+<script type="text/javascript" src="http://mcd.ischool.drexel.edu/ahn/digging-graph/sigma.parseGexf.js"></script>
+<script type="text/javascript" src="http://mcd.ischool.drexel.edu/ahn/digging-graph/utils.js"></script>
+<script src="#{url_for_solr}/admin/file?file=/velocity/sigma.js"></script>
+<link href="#{url_for_solr}/admin/file?file=/velocity/sigma.css" rel="stylesheet">
+
+<script>
+
+
+var sigInst;
+
+$(document).ready(function() {
+
+	console.log("*** init graph");
+
+	sigInst = sigma.init(document.getElementById('sig')).drawingProperties({
+		defaultLabelColor: '#fff',
+		defaultLabelSize: 14,
+		defaultLabelBGColor: '#fff',
+		defaultLabelHoverColor: '#000',
+		labelThreshold: 6,
+		defaultEdgeType: 'curve'
+	}).graphProperties({
+		minNodeSize: 0.5,
+		maxNodeSize: 5,
+		minEdgeSize: 1,
+		maxEdgeSize: 1,
+		sideMargin: 50
+	}).mouseProperties({
+		maxRatio: 32
+	});//.position(-900,-800,3);
+
+	sigInst.parseGexf('#{url_for_solr}/admin/file?file=/velocity/digging-openoard-withlabel4e.gexf');
+
+	/**
+	* Now, here is the code that shows the popup :
+	*/
+	var popUp;
+	// This function is used to generate the attributes list from the node attributes.
+	// Since the graph comes from GEXF, the attibutes look like:
+	// [
+	//   { attr: 'Lorem', val: '42' },
+	//   { attr: 'Ipsum', val: 'dolores' },
+	//   ...
+	//   { attr: 'Sit',   val: 'amet' }
+	// ]
+	function attributesToString(attr) {
+		var attrs = {};
+		for(i = 0; i < attr.length; i++) {
+			o = attr[i];
+			attrs[o.attr] = o.val;
+		}
+
+		res = '';
+		res = "<li><b>" + attrs['ddclabel'] + '</b></li>\n';
+		res += "<li>" + attrs['ddcclass'] + '</li>\n';
+		res += "<li>" + attrs['ddcdivision'] + '</li>\n';
+		res += "<li>" + attrs['ddcsection'] + '</li>\n';
+		  
+		return res;
+		return '' +
+			attr.map(function(o){
+				return '<li>' + o.attr + ' : ' + o.val + '</li>';
+			}).join('') +
+			'';
+	}
+
+	function showNodeInfo(event) {
+		  
+		  
+		popUp && popUp.remove();
+
+		var node;
+		sigInst.iterNodes(function(n){
+			node = n;
+		},[event.content[0]]);
+		console.log(node, node.displayX, node.displayY);
+		popUp = $(
+			'<div class="node-info-popup"><ul></ul></div>'
+		).append(
+			// The GEXF parser stores all the attributes in an array named
+			// 'attributes'. And since sigma.js does not recognize the key
+			// 'attributes' (unlike the keys 'label', 'color', 'size' etc),
+			// it stores it in the node 'attr' object :
+			// "testkey:testval"
+			attributesToString( node['attr']['attributes'] )
+		).attr(
+			'id',
+			'node-info'+sigInst.getID()
+		).css({
+			'display': 'inline-block',
+			'border-radius': 3,
+			'padding': 5,
+			'background': '#fff',
+			'color': '#000',
+			'box-shadow': '0 0 4px #666',
+			'position': 'absolute',
+			'left': node.displayX,
+			'top': node.displayY+15
+		});
+
+		$('ul',popUp).css('margin','0 0 0 20px');
+		$('#sig').append(popUp);
+	}
+
+	function hideNodeInfo(event) {
+		popUp && popUp.remove();
+		popUp = false;
+	}
+
+	sigInst.bind('overnodes',showNodeInfo).bind('outnodes',hideNodeInfo).draw();
+	isSigInit = true;
+	
+	$(function() {
+		$( "#dashtabs" ).tabs({ active: 0 });
+	});
+	
+    });
+
+	function selectDDC(query) {
+		console.log(document.getElementById("sig"));
+		var nodes = [];
+		greyColor = "#666";
+		neighbors = {};
+		
+		// var query = document.getElementById('query').value;
+		var found = false;
+
+
+		if(query.indexOf(".") == -1) {
+			var queryRoot = query
+		}
+		else {
+			var queryRoot = query.substring(0, query.indexOf("."))
+		}
+		
+
+		sigInst.iterNodes(function(n){
+			node = n;
+
+			// if(n.label==query) {
+				
+			if(n.label.indexOf(".") == -1) {
+				var labelRoot = n.label
+			}
+			else {
+				var labelRoot = n.label.substring(0, n.label.indexOf("."))
+			}
+				
+				
+			if(labelRoot == queryRoot) {
+				n.attr['true_color'] = n.color;
+				n.attr['selected'] = 1;
+				n.color = "#FF0000";
+		
+				nodes[0] = n.id;
+				found = true;
+				zoomSelection(n);
+			}
+		});
+		
+		if(!found) {
+			alert("No result found");
+			return;
+		}
+		
+		sigInst.iterEdges(function(e){
+			if(nodes.indexOf(e.source)<0 && nodes.indexOf(e.target)<0){
+				if(!e.attr['grey']){
+					e.attr['true_color'] = e.color;
+					e.color = greyColor;
+					e.attr['grey'] = 1;
+				}
+			}else{
+				e.color = e.attr['grey'] ? e.attr['true_color'] : e.color;
+				e.attr['grey'] = 0;
+
+				neighbors[e.source] = 1;
+				neighbors[e.target] = 1;
+			}
+		}).iterNodes(function(n){
+			if(!neighbors[n.id]){
+				if(!n.attr['grey']){
+					n.attr['true_color'] = n.color;
+					n.color = greyColor;
+					n.attr['grey'] = 1;
+				}
+			}else{
+				n.color = n.attr['grey'] ? n.attr['true_color'] : n.color;
+				n.attr['grey'] = 0;
+			}
+		}).draw(2,2,2);			
+		
+		
+		// sigInst.draw(2,2,2);
+		// console.log(sigInst.position);
+	}
+	
+	function clearSelectDDC() {
+		sigInst.iterEdges(function(e){
+			e.color = e.attr['grey'] ? e.attr['true_color'] : e.color;
+			e.attr['grey'] = 0;
+		}).iterNodes(function(n){
+			n.color = n.attr['grey'] ? n.attr['true_color'] : n.color;
+			n.color = n.attr['selected'] ? n.attr['true_color'] : n.color;
+			n.attr['grey'] = 0;
+			n.attr['selected'] = 0;
+		}).draw();			
+
+		sigInst.position(0,0,1).draw();
+	}
+
+	function zoomSelection(n) {
+		var x = n.displayX;
+		var y = n.displayY;
+		// sigInst._core.mousecaptor.isMouseDown = TRUE;
+		clearSelectDDC();
+		console.log(sigInst.position());
+		
+		var p = sigInst.position();
+		// sigInst.zoomTo(x - p.stageX, y - p.stageY, 1);
+		sigInst.zoomTo(x, y, 20);
+	}
+</script>
+
+<!-- My scripts -->
+
+<script src="#{url_for_solr}/admin/file?file=/velocity/dashboard.js"></script>
+<script src="#{url_for_solr}/admin/file?file=/velocity/utils.js"></script>
+
+<script type="text/javascript">
+
+
+$(function() {
+	$( "#dashtabs" ).tabs();
+	$( "#dashtabs" ).tabs({ active: 1 }); // activate sigma.js tab first for drawing the graph.  Will activate tab:0 after the graph is drawn.
+});
+
+init_tooltip();
+	
+</script>
+	
+</head>
+  <body onResize='setDashboardWidth()' onLoad='setDashboardWidth()'>
+  
+  <div id="tooltip" class="tooltip" style="opacity:0"></div>
+  
+  <script>
+  
+  var ddclevel = "class";
+  
+  function getDDClevel(s) {
+	  console.log(s);
+
+	  if(s.indexOf("fq=ddc_class") >= 0)
+	  	ddclevel = "division";
+
+  	  if(s.indexOf("fq=ddc_division") >= 0)
+  	  	ddclevel = "section";
+
+    	  if(s.indexOf("fq=ddc_section") >= 0)
+    	  	ddclevel = "section";
+  }
+  
+  fqstr = "#fqs($request.params.getParams('fq'))";
+  getDDClevel(fqstr);
+
+  </script>
+    <div id="header">
+      #parse("header.vm")
+    </div>
+<!--   <div id="tabs">
+      #parse("tabs.vm")
+    </div>-->
+    <div id="content">
+      $content
+    </div>
+    <div id="footer">
+      #parse("footer.vm")
+    </div>
+
+
+<script>
+#set($i = 0)
+#foreach($field in $response.facetFields)
+	#if($field.name == "ddc_class")
+		#foreach($facet in $field.values)
+			add_data("$facet.name", "$facet.count", "ddc_class");
+			add_data_pie("$facet.name" + "00", "$facet.count", "ddc_class");
+		#end
+	#end
+
+	#if($field.name == "ddc_division")
+		#foreach($facet in $field.values)
+			add_data("$facet.name", "$facet.count", "ddc_division");
+		#end
+	#end
+
+	#if($field.name == "ddc_section")
+		#foreach($facet in $field.values)
+			add_data("$facet.name", "$facet.count", "ddc_section");
+		#end
+	#end
+#end
+
+//#foreach($field in $response.facetFields)
+//	#if($field.name == "libid")
+//		#foreach($facet in $field.values)
+//			add_data_pie("$facet.name", "$facet.count");
+//		#end
+//
+//	#end
+//#end
+
+
+// init(data);
+init_pie(data_pie);
+
+function ajaxtest() {
+    jQuery.ajax({
+          type:"GET",
+          url:"http://mcd.ischool.drexel.edu/ahn/test.cgi",
+		  contentType: "jsonp",
+          dataType:"jsonp", // 옵션이므로 JSON으로 받을게 아니면 안써도 됨
+          success : function(data) {
+			  console.log("success");
+			  console.log(data);
+			  document.getElementById('testbutton').value = data;
+          },
+          complete : function(data) {
+                // 통신이 실패했어도 완료가 되었을 때 이 함수를 타게 된다.
+                // TODO
+  			  console.log("complete");
+  			  console.log(data);
+          },
+          error : function(xhr, status, error) {
+			  console.log("error");
+			  console.log("error code:" + error);
+          }
+    });
+
+
+
+}
+
+
+function showhide() {
+	var gr = document.getElementById("db-graphs");
+	if(gr.style.display == "block")
+		gr.style.display = "None";
+	else
+		gr.style.display = "block";
+}
+
+</script>
+
+
+<!-- Placed at the end of the document so the pages load faster -->
+<!--
+<script src="http://mcd.ischool.drexel.edu/ahn/conceptmapping2/bootstrap/js/bootstrap-transition.js"></script>
+<script src="http://mcd.ischool.drexel.edu/ahn/conceptmapping2/bootstrap/js/bootstrap-alert.js"></script>
+<script src="http://mcd.ischool.drexel.edu/ahn/conceptmapping2/bootstrap/js/bootstrap-modal.js"></script>
+<script src="http://mcd.ischool.drexel.edu/ahn/conceptmapping2/bootstrap/js/bootstrap-dropdown.js"></script>
+<script src="http://mcd.ischool.drexel.edu/ahn/conceptmapping2/bootstrap/js/bootstrap-scrollspy.js"></script>  -->
+<!-- <script src="http://mcd.ischool.drexel.edu/ahn/conceptmapping2/bootstrap/js/bootstrap-tab.js"></script>  -->
+<script src="#{url_for_solr}/admin/file?file=/velocity/bootstrap/js/bootstrap-tooltip.js"></script>
+<!--<script src="http://mcd.ischool.drexel.edu/ahn/conceptmapping2/bootstrap/js/bootstrap-popover.js"></script>
+<script src="http://mcd.ischool.drexel.edu/ahn/conceptmapping2/bootstrap/js/bootstrap-button.js"></script>
+<script src="http://mcd.ischool.drexel.edu/ahn/conceptmapping2/bootstrap/js/bootstrap-collapse.js"></script>
+<script src="http://mcd.ischool.drexel.edu/ahn/conceptmapping2/bootstrap/js/bootstrap-carousel.js"></script>
+<script src="http://mcd.ischool.drexel.edu/ahn/conceptmapping2/bootstrap/js/bootstrap-typeahead.js"></script>
+-->
+
+
+</script>
+
+
+
+
+<span id='ddc_tooltip'  onClick='hide_tooltip()' onMouseOut='hide_tooltip()' style='visibility:hidden; position:absolute; border: 1px solid black; background: white; font-size: 11px; margin: 2px; padding: 0px; padding-left: 10px; padding-right: 10px'>tooltip</span>
+  </body>
+</html>

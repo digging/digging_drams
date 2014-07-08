@@ -1,0 +1,263 @@
+#set($searcher=$request.searcher)
+#set($params=$request.params)
+#set($clusters = $response.response.clusters)
+#set($mltResults = $response.response.get("moreLikeThis"))
+#set($annotate = $params.get("annotateBrowse"))
+#parse('query.vm')
+
+#if($response.response.spellcheck.suggestions and $response.response.spellcheck.suggestions.size() > 0)
+  Did you mean <a href="#url_for_home?q=$esc.url($response.response.spellcheck.suggestions.collation)#if($list.size($request.params.getParams('fq')) > 0)&#fqs($request.params.getParams('fq'))#end#debug">$response.response.spellcheck.suggestions.collation</a>?
+#end
+   <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span3">
+  		<div class='alert alert-success'>
+		<strong>General Tips</strong>
+		<ul>
+		<li>Click on a DDC class in search results to filter
+		<li>Click on <i class="icon-remove"></i> icon from the <span class="label label-success">DDC Filter</span> to remove the corresponding filter
+		</ul>
+		</div>
+		
+		
+		<div class='alert alert-info' id='help-tab2' style='display:None'>
+		<strong>DDC Localized View Tips</strong>
+		<ul>
+		<li>DDC Localized view explores the top 5 DDC classes associated with the search query.
+		<li>You can see the DDC labels if you move 
+		<li>Click each DDC nodes to expand the exploration to additional 5 DDC classes
+		</ul>
+		</div>
+		
+		<div class='alert alert-info' id='help-tab3' style='display:None'>
+		<strong>DDC Universe View Tips</strong>
+		<ul>
+		<li>Use mouse wheel to zoom in or out
+		<li>Drag the space to pan the view
+		<li>Use <i class="icon-search"></i> icon from the search result to search the DDC in the universe view</li>
+
+		</ul>
+		</div>
+				
+        </div><!--/span-->
+        <div class="span9" id='rightspan'>
+
+		<form class="form-search" id="query-form" action="#{url_for_home}" method="GET">
+		Enter Query to Search
+  		  <input type="text" id="q" name="q"  class="input-large search-query"  value="$!esc.html($params.get('q'))" value="$!esc.html($params.get('q'))">
+ 		 <button type="submit" class="btn">Search</button>
+ 		  <input type='hidden' name='facet.sort' value='index'>
+		</form>
+
+#if(!$params.get('q'))
+<div class="alert alert-error">Please enter query</div>
+#else
+
+#if($page.results_found == 0)
+<div class="alert alert-error">No result found</div>
+#else
+
+<div class="pagination" style='margin-top:0px'>
+  #if($response.response.get('grouped'))
+    <span><span class="results-found">$response.response.get('grouped').size() group(s)</span> found in ${response.responseHeader.QTime} ms</span>
+  #else
+  
+  <span><span class="results-found">$page.results_found</span> results found |
+  	#link_to_previous_page("previous")
+  
+  Page <span class="page-num">$page.current_page_number</span> of <span
+        class="page-count">$page.page_count</span>
+		
+	    #link_to_next_page("next") 
+		
+		#end
+</div>
+
+#end
+
+#end
+
+
+<!---------------------------------------------------------------------------
+	Facet paths
+---------------------------------------------------------------------------->
+
+
+<!-- <div class="constraints" #annTitle("Lists out the &fq filters.  Click to remove.")> -->
+#if($params.getParams('fq'))
+	<span class="label label-success">DDC Filter</span>
+	#end
+  #foreach($fq in $params.getParams('fq'))
+    #set($previous_fq_count=$velocityCount - 1)
+    #if($fq != '')
+    
+	<span>$fq.split(":").get(1).replace("_", " ")</span><a href="#url_for_filters($request.params.getParams('fq').subList(0,$previous_fq_count))"><i class="icon-remove"></i></a>
+    #end
+  #end
+  
+<!-- </div> -->
+<script>
+
+var init_graph = false;
+
+function init_graph() {
+	
+}
+
+var isCircleInit = false;
+function init_circle2() {
+	if(!isCircleInit) {
+		console.log("initializing circle");
+		search_circle();
+		isCircleInit = true;
+	}
+	return true;
+}
+
+</script>
+
+
+
+
+
+<div class="error">
+  #if(${response.response.error.code})
+    <h1>ERROR ${response.response.error.code}</h1>
+    ${response.response.error.msg}
+  #end
+</div>
+
+
+<div class="results" style='margin-left:0px'>
+  #if($response.response.get('grouped'))
+    #foreach($grouping in $response.response.get('grouped'))
+      #parse("hitGrouped.vm")
+    #end
+  #else
+    #foreach($doc in $response.results)
+      #parse("hit.vm")
+    #end
+  #end
+</div>
+
+
+#if($page.results_found != 0)
+
+<div class="pagination">
+  #if($response.response.get('grouped'))
+  #else
+  <span class="results-found">$page.results_found</span> results found |
+  #link_to_previous_page("previous")
+  Page <span class="page-num">$page.current_page_number</span> of <span
+        class="page-count">$page.page_count</span>
+  #link_to_next_page("next")
+  #end
+  <br/>
+</div>
+
+#end
+
+</div><!--/span-->
+
+<!--
+
+
+            <div class="span4">
+              <h2>Heading</h2>
+              <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+              <p><a class="btn" href="#">View details &raquo;</a></p>
+            </div><!--/span-->
+          </div><!--/row-->
+        </div><!--/span-->
+
+      </div><!--/row-->
+
+
+
+
+
+      <hr>
+
+      <footer>
+	  <img height=50px style="height:50px" src="#{url_for_solr}/admin/file?file=/velocity/logo-du.png">
+	  <img height=50px style="height:50px" src="#{url_for_solr}/admin/file?file=/velocity/logo-usw.jpg">
+	  <img height=50px style="height:50px" src="#{url_for_solr}/admin/file?file=/velocity/logo-um.jpg">
+
+
+      </footer>
+
+    </div><!--/.fluid-container-->
+
+
+
+
+#macro(display_chart2 $pivots)
+  #if($pivots.size() > 0)
+
+	#set($max = 0)
+      #foreach ($pivot in $pivots)
+        #foreach ($entry in $pivot.value)
+			#if($max < $entry.count)
+				#set($max = $entry.count)
+			#end
+		#end
+	#end
+	<table style="border=0; font-size:12px" border=1 width=800>
+      #foreach ($pivot in $pivots)
+        #foreach ($entry in $pivot.value)
+		<tr>
+			<td align=right>$entry.value.replace("_", " ")</td>
+			#set($linelength=$entry.count * 300 / $max)
+			<td>
+				<img height="20" style='height:20px' src="#{url_for_solr}/admin/file?file=/velocity/red-spacer.png" width="$linelength" onClick='alert("hi")'> $entry.count
+<!--			<div class="progress" width=700>
+				<div class="bar bar-danger" style="width: $linelength"></div>
+			</div> -->
+			</td>
+		</tr>
+		#end
+	#end
+	</table>
+  #end
+#end
+
+#macro(display_chart $pivots)
+#if($response.facetFields)
+	
+	#set($max = 0)
+      #foreach ($field in $pivots)
+        #foreach ($facet in $field.values)
+			#if($max < $facet.count)
+				#set($max = $facet.count)
+			#end
+		#end
+	#end
+	
+	
+    #foreach($field in $pivots)
+      ## Hide facets without value
+      #if($field.values.size() > 0)
+	<table style="border=0; font-size:12px" width=800>
+
+      <ul>
+        #foreach($facet in $field.values)
+			#set($linelength=$facet.count * 300 / $max)
+		<tr>
+			<td align=right><a href="#url_for_facet_filter($field.name, $facet.name)">$facet.name.replace("_", " ")</a> </td>
+			<td>
+				<a href="#url_for_facet_filter($field.name, $facet.name)"><img height="20" style='height:20px' src="#{url_for_solr}/admin/file?file=/velocity/red-spacer.png" width="$linelength"></a> $facet.count
+			</td>
+		</tr>
+
+        #end
+      </table>
+      #end
+    #end
+  #end
+
+#end
+
+</div>
+
+
+

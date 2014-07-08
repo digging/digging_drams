@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<solr persistent="true">
+  <cores defaultCoreName="collection1" adminPath="/admin/cores" zkClientTimeout="${zkClientTimeout:15000}" hostPort="8983" hostContext="solr">
+    <core instanceDir="collection1/" name="collection1"/>
+    <core schema="schema.xml" instanceDir="test_core/" name="drams" config="solrconfig.xml" dataDir="data"/>
+    <core schema="schema.xml" instanceDir="ddc/" name="ddc" config="solrconfig.xml" dataDir="data"/>
+    <core schema="schema.xml" instanceDir="drams_manual/" name="drams_manual" config="solrconfig.xml" dataDir="data"/>
+    <core schema="schema.xml" instanceDir="exp1/" name="exp1" config="solrconfig.xml" dataDir="data"/>
+    <core schema="schema.xml" instanceDir="exp2/" name="exp2" config="solrconfig.xml" dataDir="data"/>
+  </cores>
+</solr>

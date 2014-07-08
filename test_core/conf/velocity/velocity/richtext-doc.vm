@@ -1,0 +1,92 @@
+#if($doc.getFieldValue('title'))
+  #set($title = $esc.html($doc.getFirstValue('title')))
+#else
+  #set($title = "["+$doc.getFieldValue('id')+"]")
+#end
+#if($doc.getFieldValue('url'))
+  #set($url = $doc.getFieldValue('url'))
+#elseif($doc.getFieldValue('resourcename'))
+  #set($url = "file:///$doc.getFieldValue('resourcename')")
+#else
+  #set($url = "$doc.getFieldValue('id')")
+#end
+
+#if($doc.getFieldValue('ddc'))
+  #set($ddc = $doc.getFieldValue('ddc'))
+#else
+  #set($ddc = "None")
+#end
+
+
+#set($supportedtypes = "7z;ai;aiff;asc;audio;bin;bz2;c;cfc;cfm;chm;class;conf;cpp;cs;css;csv;deb;divx;doc;dot;eml;enc;file;gif;gz;hlp;htm;html;image;iso;jar;java;jpeg;jpg;js;lua;m;mm;mov;mp3;mpg;odc;odf;odg;odi;odp;ods;odt;ogg;pdf;pgp;php;pl;png;ppt;ps;py;ram;rar;rb;rm;rpm;rtf;sig;sql;swf;sxc;sxd;sxi;sxw;tar;tex;tgz;txt;vcf;video;vsd;wav;wma;wmv;xls;xml;xpi;xvid;zip")
+#set($ct = $list.get($doc.getFirstValue('content_type').split(";"),0))
+#set($filename = $doc.getFieldValue('resourcename'))
+#set($filetype = $mimeToExt.get($ct))
+#if(!$filetype)#set($filetype = $filename.substring($filename.lastIndexOf(".")).substring(1))#end
+#if(!$filetype)#set($filetype = "file")#end
+#if(!$supportedtypes.contains($filetype))#set($filetype = "file")#end
+<div class="result-title">
+## Small file type icons from http://www.splitbrain.org/projects/file_icons (public domain)
+<!--<i class="icon-file"></i> -->
+<span class="label label-info">$doc.getFieldValue('libid').toUpperCase()</span>
+#set($url1 = $url.get(0))
+<a href="${url1}" target="_blank">
+	<b>$title</b>
+</a>
+<!--	<span class="mlt">   #if($params.getBool('mlt', false) == false)<a href="#lensNoQ&q=id:%22$docId%22&mlt=true">More Like This</a>#end</span> -->
+<!-- <span>(ID: #field('id'))</span> -->
+<br>
+
+#set($ddc_code = $doc.getFieldValue("ddc_section_code"))
+
+<span class="label label-success">DDC</span>
+#if( $ddc_code)
+	#set($idx = 0)
+	#foreach ($code in $ddc)
+		#set($ddc_section_split = $code.split("_").get(0))
+		#set($temp3 = $ddc_section_split.indexOf("."))
+		#if($temp3 != -1)
+			#set($temp5 = $ddc_section_split.substring(0, $temp3))
+		#else
+			#set($temp5 = $ddc_section_split)
+		#end
+
+		#set($label = $ddc_code.get($idx))
+
+		<i class="icon-search" onClick="highlight_node('$code')"></i><a href="#url_for_facet_filter('ddc_section_code', $label)" onMouseOver='show_tooltip(this, event, "$code")' onMouseOut='hide_tooltip()' ddc='$code'>$code</a>  
+	<!--	<a href="#url_for_facet_filter('ddc_section_code', $label)" class='ddc' ddc='$code'>$code</a>  <i class="icon-search" onClick="highlight_node('$code')"></i> -->
+	
+		#set($idx = $idx + 1)
+	#end
+	#else
+	<span style='color:#888; font-size:10px'>No DDC assigned for this record</span>
+#end
+
+
+
+</div>
+<!-- <div>#field('description')</div> -->
+
+
+#if($doc.getFieldValue('author'))<div>Author: #field('author')</div>#end
+#if($doc.getFieldValue('last_modified'))<div>Last-modified: #field('last_modified')</div>#end
+<div class="result-body" style="display:none">#field('description')</div>
+<div class="mlt">
+  #set($mlt = $mltResults.get($docId))
+  #set($mltOn = $params.getBool('mlt'))
+  #if($mltOn == true)<div class="field-name">Similar Items</div>#end
+  #if ($mltOn && $mlt && $mlt.size() > 0)
+  <ul>
+    #foreach($mltHit in $mlt)
+      #set($mltId = $mltHit.getFieldValue('id'))
+      <li><div><a href="#url_for_home?q=id:$mltId">$mltId</a></div><div><span class="field-name">Title:</span> $mltHit.getFieldValue('title')</div>
+        <div><!-- <span class="field-name">Author:</span> $mltHit.getFieldValue('author') --> <span class="field-name">Description:</span> $mltHit.getFieldValue('description')</div>
+
+      </li>
+    #end
+  </ul>
+  #elseif($mltOn && $mlt.size() == 0)
+    <div>No Similar Items Found</div>
+  #end
+</div>
+#parse('debug.vm')

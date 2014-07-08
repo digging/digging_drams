@@ -1,0 +1,106 @@
+<script>
+function toggle_block(o) {
+	var c = o.parentNode.children[2];
+
+	console.log(c);
+	if(c.style.display != 'block' && c.style.display != 'none') {
+		c.style.display = "none";
+		o.innerHTML = '<i class="icon-plus"></i>';
+	}
+	else if(c.style.display == "block") {
+		c.style.display = "none";
+		o.innerHTML = '<i class="icon-plus"></i>';
+	}
+	else if(c.style.display == "none") {
+		c.style.display = "block";
+		o.innerHTML = '<i class="icon-minus"></i>';
+	}
+	
+}
+
+</script>
+
+<style>
+
+.ddc_list {
+margin-left: 25px; list-style-type: none; text-indent: -25px;
+}
+
+.ddcdivclass {
+margin-left: 25px; list-style-type: none;
+}
+
+.ddcsecclass {
+margin-left: 25px; list-style-type: none;
+}
+
+
+</style>
+
+#macro(my_display_facet_pivot $pivots, $display)
+  #if($pivots.size() > 0)
+  <span class="facet-field">$display</span>
+    <ul class="ddc_list">
+      #foreach ($pivot in $pivots)
+        #foreach ($entry in $pivot.value)
+		  <span>
+          <li><a href="#url_for_facet_filter($entry.field, $entry.value)">$entry.value.replace("_", " ")</a> ($entry.count)
+		  <span onClick="toggle_block(this)" style='cursor:pointer'><i class="icon-plus"></i></span>
+		  #set($classcode=$entry.value.substring(0,1))
+          <ul id='ddcdiv' class='ddcdivclass' >
+            #foreach($nest in $entry.pivot)
+				#if($classcode == $nest.value.substring(0,1))
+				  <span>
+				  <li><a href="#url_for_facet_filter($entry.field, $entry.value)&fq=$esc.url($nest.field):%22$esc.url($nest.value)%22">$nest.value.replace("_", " ")</a> ($nest.count)
+				 #set($divisioncode=$nest.value.substring(0,2))
+				 <span onClick="toggle_block(this)" style='cursor:pointer'><i class="icon-plus"></i></span>
+				  	<ul id='ddcsec' class='ddcsecclass' >
+						#foreach($section in $nest.pivot)
+							#if($section.value.length() >= 2 &&  $divisioncode == $section.value.substring(0,2))
+								<li><a href="#url_for_facet_filter($entry.field, $entry.value)&fq=$esc.url($nest.field):%22$esc.url($nest.value)%22&fq=$esc.url($section.field):%22$esc.url($section.value)%22">$section.value.replace("_", " ")</a> ($section.count) 
+							#end
+						#end
+					</ul> 
+				</span>
+				#end
+            #end
+          </ul>
+		  </span>
+        #end
+      #end
+    </ul>
+  #end
+#end
+
+
+
+#set($pivot = $response.response.facet_counts.facet_pivot)
+#my_display_facet_pivot($pivot, "")
+
+<script>
+function process_pivot_tree(s) {
+	//console.log(s);
+}
+</script>
+
+<script>
+process_pivot_tree("$pivot");
+</script>
+
+
+#set($temp=$pivot.substring($pivot, 10))
+
+<script>
+
+var els = document.getElementsByClassName("ddcdivclass");
+for(i = 0; i < els.length; i++) {
+	els[i].style.display = 'none';
+}
+
+els = document.getElementsByClassName("ddcsecclass");
+for(i = 0; i < els.length; i++) {
+	els[i].style.display = 'none';
+}
+
+</script>
+

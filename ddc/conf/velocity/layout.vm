@@ -1,0 +1,28 @@
+<html>
+<head>
+  #parse("head.vm")
+</head>
+  <body>
+    #foreach($field in $response.facetFields)
+      ## Hide facets without value
+      #if($field.values.size() > 0)
+      <!-- <span class="facet-field">$field.name</span>
+
+      <ul>
+        #foreach($facet in $field.values)
+            <li><a href="#url_for_facet_filter($field.name, $facet.name)">$facet.name</a> ($facet.count)</li>
+        #end
+      </ul> -->
+      #end
+    #end    <div id="admin"><a href="#url_root/#/#core_name">Solr Admin</a></div>
+    <div id="header">
+      #parse("header.vm")
+    </div>
+    <div id="content">
+      $content
+    </div>
+    <div id="footer">
+      #parse("footer.vm")
+    </div>
+  </body>
+</html>

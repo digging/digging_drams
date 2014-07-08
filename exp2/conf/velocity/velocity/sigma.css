@@ -1,0 +1,18 @@
+  /* sigma.js context : */
+  .sigma {
+    margin-left:auto;
+    margin-right:auto;
+    position: relative;
+    border-radius: 8px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    background: #222;
+    width: 700px;
+    height: 300px;
+  }
+
+
+.node-info-popup {
+font-family: Arial;
+font-size: 12px;
+}

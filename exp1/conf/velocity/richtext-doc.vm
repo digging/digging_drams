@@ -53,7 +53,7 @@
 
 		#set($label = $ddc_code.get($idx))
 
-		<i class="icon-search" onClick="highlight_node('$code')"></i><a href="#url_for_facet_filter('ddc_section_code', $label)" onMouseOver='show_tooltip(this, event, "$code")' onMouseOut='hide_tooltip()' ddc='$code' onClick='save_log({"action":"clickddc", "value":"$code"})'>$code</a>  
+		<i class="icon-search" onClick="highlight_node('$code')"></i><a href="#url_for_facet_filter('ddc_section_code', $label)" onMouseOver='show_tooltip(this, event, "$code")' onMouseOut='hide_tooltip()' ddc='$code' onMouseDown='save_log({"action":"clickddc", "value":"$code"})'>$code</a>  
 	<!--	<a href="#url_for_facet_filter('ddc_section_code', $label)" class='ddc' ddc='$code'>$code</a>  <i class="icon-search" onClick="highlight_node('$code')"></i> -->
 	
 		#set($idx = $idx + 1)

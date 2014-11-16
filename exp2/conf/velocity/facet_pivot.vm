@@ -44,8 +44,8 @@ margin-left: 25px; list-style-type: none;
       #foreach ($pivot in $pivots)
         #foreach ($entry in $pivot.value)
 		  <span>
-          <li><a href="#url_for_facet_filter($entry.field, $entry.value)">$entry.value.replace("_", " ")</a> ($entry.count)
-		  <span onClick="toggle_block(this)" style='cursor:pointer'><i class="icon-plus"></i></span>
+          <li><a href="#url_for_facet_filter($entry.field, $entry.value)" onClick='save_log({"action":"click_branch", "value":"$entry.value"})'>$entry.value.replace("_", " ")</a> ($entry.count)
+		  <span onClick='toggle_block(this); save_log({"action":"toggle_branch", "value":"$entry.value"})' style='cursor:pointer'><i class="icon-plus"></i></span>
 		  #set($classcode=$entry.value.substring(0,1))
           <ul id='ddcdiv' class='ddcdivclass' >
             #foreach($nest in $entry.pivot)

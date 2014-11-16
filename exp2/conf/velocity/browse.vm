@@ -96,8 +96,9 @@
   #foreach($fq in $params.getParams('fq'))
     #set($previous_fq_count=$velocityCount - 1)
     #if($fq != '')
-    
-	<span>$fq.split(":").get(1).replace("_", " ")</span><a href="#url_for_filters($request.params.getParams('fq').subList(0,$previous_fq_count))"><i class="icon-remove"></i></a>
+    #set($fqstr = $fq.split(":").get(1).replace("_", " "))
+  
+	<span>${fqstr}</span><a href="#url_for_filters($request.params.getParams('fq').subList(0,$previous_fq_count))" onClick='save_log({"action":"remove_facet", "value":${fqstr}})'><i class="icon-remove"></i></a>
     #end
   #end
   

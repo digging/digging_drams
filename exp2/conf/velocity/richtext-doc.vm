@@ -30,7 +30,7 @@
 <!--<i class="icon-file"></i> -->
 <span class="label label-info">$doc.getFieldValue('libid').toUpperCase()</span>
 #set($url1 = $url.get(0))
-<a href="${url1}" target="_blank">
+<a href="${url1}" target="_blank" onClick='save_log({"action":"opendoc", "value":"${url1}"})'>
 	<b>$title</b>
 </a>
 <!--	<span class="mlt">   #if($params.getBool('mlt', false) == false)<a href="#lensNoQ&q=id:%22$docId%22&mlt=true">More Like This</a>#end</span> -->
@@ -53,7 +53,7 @@
 
 		#set($label = $ddc_code.get($idx))
 
-		<i class="icon-search" onClick="highlight_node('$code')"></i><a href="#url_for_facet_filter('ddc_section_code', $label)" onMouseOver='show_tooltip(this, event, "$code")' onMouseOut='hide_tooltip()' ddc='$code'>$code</a>  
+		<i class="icon-search" onClick="highlight_node('$code')"></i><a href="#url_for_facet_filter('ddc_section_code', $label)" onMouseOver='show_tooltip(this, event, "$code")' onMouseOut='hide_tooltip()' ddc='$code' onMouseDown='save_log({"action":"clickddc", "value":"$code"})'>$code</a>  
 	<!--	<a href="#url_for_facet_filter('ddc_section_code', $label)" class='ddc' ddc='$code'>$code</a>  <i class="icon-search" onClick="highlight_node('$code')"></i> -->
 	
 		#set($idx = $idx + 1)

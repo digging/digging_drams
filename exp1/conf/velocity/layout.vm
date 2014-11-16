@@ -296,9 +296,8 @@ init_tooltip();
 </head>
 
 #set($query_string = $params.get('q'))
-
-  <body onResize='setDashboardWidth()' onLoad="save_log({'action':'query','value':'${query_string}'}); setDashboardWidth()">
-  
+#set($rf = $page.results_found)
+  <body onResize='setDashboardWidth()' onLoad="save_log({'action':'query','value':'${query_string}', 'numDoc':'${rf}'}); setDashboardWidth()">
   <div id="tooltip" class="tooltip" style="opacity:0"></div>
   
   <script>

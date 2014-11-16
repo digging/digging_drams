@@ -47,8 +47,7 @@ function show_tooltip(obj, e, ddc) {
 		},
 	        error : function(xhr, status, error) {}
 	});
-	
-
+	save_log({"action":"show_tooltip", "value":ddc, "other":data});
 }
 
 function hide_tooltip() {
@@ -57,8 +56,32 @@ function hide_tooltip() {
         return true;
     else
         el.style.visibility = "hidden";	
+
+	save_log({"action":"hide_tooltip"});
 }
 
 // function show_tooltip(current, e, title, description, docid) {
 // 
 // }
+
+
+function save_log(logitem) {
+	var jsons = JSON.stringify(logitem);
+
+	jQuery.ajax({
+		type:"POST",
+		url:"http://mcd.ischool.drexel.edu/ahn/save_log.cgi?system=exp2&logstring=" + jsons,
+          contentType: "jsonp",
+          dataType:"jsonp",
+          success : function(data) {
+              console.log("Log success" + jsons);
+         },
+          complete : function(data) {
+          },
+          error : function(xhr, status, error) {
+              console.log("Log error " + error);
+          }
+      });
+ 
+ 
+  }

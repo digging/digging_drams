@@ -30,7 +30,7 @@
 <!--<i class="icon-file"></i> -->
 <span class="label label-info">$doc.getFieldValue('libid').toUpperCase()</span>
 #set($url1 = $url.get(0))
-<a href="${url1}" target="_blank" onClick='save_log({"action":"opendoc", "value":"$title"})'>
+<a href="${url1}" target="_blank" onClick='save_log({"action":"opendoc", "value":"${url1}"})'>
 	<b>$title</b>
 </a>
 <!--	<span class="mlt">   #if($params.getBool('mlt', false) == false)<a href="#lensNoQ&q=id:%22$docId%22&mlt=true">More Like This</a>#end</span> -->

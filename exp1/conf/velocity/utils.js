@@ -70,7 +70,7 @@ function save_log(logitem) {
 
 	jQuery.ajax({
 		type:"GET",
-		url:"http://mcd.ischool.drexel.edu/ahn/save_log.cgi?logstring=" + jsons,
+		url:"http://mcd.ischool.drexel.edu/ahn/save_log.cgi?system=exp1&logstring=" + jsons,
 		contentType: "jsonp",
 		dataType:"jsonp",
 		success : function(data) {
